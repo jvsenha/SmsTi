@@ -2,6 +2,7 @@ package com.br.SmsTi.DTO;
 
 import com.br.SmsTi.Enum.Categorias;
 import com.br.SmsTi.Enum.Prioridade;
+import com.br.SmsTi.Enum.StatusChamado;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChamadaResponse {
+public class ChamadoResponse {
     private Long Id;
     private String titulo;
     private String descricao;
@@ -18,4 +19,5 @@ public class ChamadaResponse {
     private Long unidadeId;
     private String unidadeName;
     private Integer memorando;
+    private StatusChamado statusChamado;
 }

@@ -12,9 +12,11 @@ import com.br.SmsTi.Security.SecurityService;
 import com.br.SmsTi.Util.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -75,7 +77,7 @@ public class UserService {
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public UserDTO atualizar(Long id, UserDTO dto) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         user.setNome(dto.getNome());
         user.setEmail(dto.getEmail());
@@ -107,7 +109,7 @@ public class UserService {
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public UserEntity buscarUsuario(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
     }
 
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
@@ -134,7 +136,7 @@ public class UserService {
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public Status alternarStatus(Long id) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         if (user.getStatus() == Status.STATUS_ATIVO) {
             user.setStatus(Status.STATUS_INATIVO);

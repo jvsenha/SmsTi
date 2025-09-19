@@ -8,8 +8,10 @@ import com.br.SmsTi.Mapper.UnidadeMapper;
 import com.br.SmsTi.Repository.UnidadeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class UnidadeService {
     @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
     public UnidadeResponse atualizar(Long id, UnidadeRequest dto) {
         UnidadeEntity unidade = unidadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
 
         unidade.setNome(dto.getNome());
         unidade.setTelefone(dto.getTelefone());
@@ -67,7 +69,7 @@ public class UnidadeService {
     @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
     public UnidadeEntity buscarUnidade(Long id) {
         return unidadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
     }
 
     @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
@@ -89,7 +91,7 @@ public class UnidadeService {
     @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
     public Status alternarStatus(Long id) {
         UnidadeEntity unidade = unidadeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
 
         if (unidade.getStatus() == Status.STATUS_ATIVO) {
             unidade.setStatus(Status.STATUS_INATIVO);

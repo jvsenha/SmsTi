@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChamadaRequest {
+public class ChamadoRequest {
     private String titulo;
     private String descricao;
     private Categorias categoria;

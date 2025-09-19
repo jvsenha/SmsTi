@@ -16,7 +16,7 @@ public class ChamadoHistoricoEntity {
 
     @ManyToOne
     @JoinColumn(name = "unidadeId", nullable = false)
-    private ChamadoEnitity chamado;
+    private ChamadoEntity chamado;
 
     @Column(nullable = false)
     private String tipoAcao; // Ex: "Arquivado", "Atualizado", "Transferido"

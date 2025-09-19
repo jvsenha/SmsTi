@@ -2,7 +2,7 @@ package com.br.SmsTi.Service;
 
 import com.br.SmsTi.DTO.ComentarioRequest;
 import com.br.SmsTi.DTO.ComentarioResponse;
-import com.br.SmsTi.Entity.ChamadoEnitity;
+import com.br.SmsTi.Entity.ChamadoEntity;
 import com.br.SmsTi.Entity.ComentarioEntity;
 import com.br.SmsTi.Entity.UserEntity;
 import com.br.SmsTi.Repository.ChamadoRepository;
@@ -10,6 +10,8 @@ import com.br.SmsTi.Repository.ComentarioRepository;
 import com.br.SmsTi.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,11 +30,11 @@ public class ComentarioService {
 
     @Transactional
     public ComentarioResponse criarComentario(Long chamadoId, String usuarioEmail, ComentarioRequest request) {
-        ChamadoEnitity chamado = chamadoRepository.findById(chamadoId)
-                .orElseThrow(() -> new RuntimeException("Chamado não encontrado"));
+        ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));
 
         UserEntity usuario = userRepository.findByEmail(usuarioEmail)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         ComentarioEntity novoComentario = new ComentarioEntity();
         novoComentario.setDescricao(request.getDescricao());
@@ -46,8 +48,8 @@ public class ComentarioService {
     }
 
     public List<ComentarioResponse> getComentariosPorChamado(Long chamadoId) {
-        ChamadoEnitity chamado = chamadoRepository.findById(chamadoId)
-                .orElseThrow(() -> new RuntimeException("Chamado não encontrado"));
+        ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));
 
         return chamado.getComentarios().stream()
                 .map(comentario -> new ComentarioResponse(comentario.getId(), comentario.getDescricao(), comentario.getUsuario().getNome(), comentario.getDataComentario()))

@@ -21,7 +21,7 @@ public class ComentarioEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chamado_id", nullable = false)
-    private ChamadoEnitity chamado;
+    private ChamadoEntity chamado;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

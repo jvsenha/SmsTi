@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChamadoEnitity {
+public class ChamadoEntity {
 
     @Id
     private Long id;
@@ -42,8 +42,8 @@ public class ChamadoEnitity {
     private StatusChamado statusChamado;
 
     @ManyToOne
-    @JoinColumn(name = "unidadeId", nullable = false)
-    private UnidadeEntity unidadeId;
+    @JoinColumn(name = "unidade_Id", nullable = false)
+    private UnidadeEntity unidade;
 
     @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComentarioEntity> comentarios;
