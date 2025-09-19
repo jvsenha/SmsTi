@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -36,16 +37,19 @@ public class UserService {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     public LoginResponse autenticar(LoginRequest loginRequest) {
         UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário ou senha inválidos"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário ou senha inválidos"));
 
         if (!passwordEncoder.matches(loginRequest.getSenha(), user.getSenha())) {
-            throw new RuntimeException("Usuário ou senha inválidos");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário ou senha inválidos");
         }
 
         if (user.getStatus() != Status.STATUS_ATIVO) {
-            throw new RuntimeException("Usuário inativo");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário inativo");
         }
 
         String token = jwtUtil.generateToken(user);
@@ -58,44 +62,39 @@ public class UserService {
                 user.getId()
         );
     }
+
     @Transactional
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public UserDTO cadastrar(UserDTO dto) {
-        UserEntity user = new UserEntity();
-        user.setNome(dto.getNome());
-        user.setEmail(dto.getEmail());
+        UserEntity user = userMapper.toEntity(dto);
         user.setSenha(passwordEncoder.encode(dto.getSenha()));
-        user.setTelefone(dto.getTelefone());
         user.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.STATUS_ATIVO);
-        user.setRole(dto.getRole());
 
         userRepository.save(user);
 
-        return UserMapper.toUserDTO(user);
+        return userMapper.toUserDTO(user);
     }
+
     @Transactional
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public UserDTO atualizar(Long id, UserDTO dto) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        user.setNome(dto.getNome());
-        user.setEmail(dto.getEmail());
+        userMapper.updateEntityFromDto(dto, user);
         if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             user.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        user.setTelefone(dto.getTelefone());
-        user.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.STATUS_ATIVO);
-        user.setRole(dto.getRole());
 
         userRepository.save(user);
-        return UserMapper.toUserDTO(user);
+        return userMapper.toUserDTO(user);
     }
 
     @Transactional
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public void alterarSenhaAdmFunc(Long id, String novaSenha) {
-        UserEntity user = buscarUsuario(id);
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         user.setSenha(passwordEncoder.encode(novaSenha));
         userRepository.save(user);
     }
@@ -103,40 +102,51 @@ public class UserService {
     @Transactional
     @PreAuthorize("@securityService.isNivel3(authentication)")
     public void deletarUsuario(Long id) {
-        userRepository.deleteById(id);
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        userRepository.delete(user);
+    }
+
+    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
+    public UserDTO buscarUsuario(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        return userMapper.toUserDTO(user);
     }
 
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public UserEntity buscarUsuario(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+    public List<UserDTO> listarTodos() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserDTO)
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public List<UserEntity> listarTodos() {
-        return userRepository.findAll();
+    public List<UserDTO> listarPorRole(Role role) {
+        return userRepository.findByRole(role).stream()
+                .map(userMapper::toUserDTO)
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public List<UserEntity> listarPorRole(Role role) {
-        return userRepository.findByRole(role);
+    public List<UserDTO> listarAtivos() {
+        return userRepository.findByStatus(Status.STATUS_ATIVO).stream()
+                .map(userMapper::toUserDTO)
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public List<UserEntity> listarAtivos() {
-        return userRepository.findByStatus(Status.STATUS_ATIVO);
-    }
-
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public List<UserEntity> listarInativos() {
-        return userRepository.findByStatus(Status.STATUS_INATIVO);
+    public List<UserDTO> listarInativos() {
+        return userRepository.findByStatus(Status.STATUS_INATIVO).stream()
+                .map(userMapper::toUserDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public Status alternarStatus(Long id) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         if (user.getStatus() == Status.STATUS_ATIVO) {
             user.setStatus(Status.STATUS_INATIVO);
@@ -147,8 +157,4 @@ public class UserService {
         userRepository.save(user);
         return user.getStatus();
     }
-
-
-
-
 }

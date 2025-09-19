@@ -26,7 +26,7 @@ public class UnidadeService {
     private UnidadeMapper unidadeMapper;
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
     public UnidadeResponse cadastrar(UnidadeRequest dto) {
         UnidadeEntity unidade = new UnidadeEntity();
         unidade.setNome(dto.getNome());
@@ -41,7 +41,7 @@ public class UnidadeService {
         return unidadeMapper.toResponse(unidade);
     }
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
     public UnidadeResponse atualizar(Long id, UnidadeRequest dto) {
         UnidadeEntity unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
@@ -61,35 +61,39 @@ public class UnidadeService {
 
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication)")
     public void deletarUnidade(Long id) {
         unidadeRepository.deleteById(id);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
-    public UnidadeEntity buscarUnidade(Long id) {
-        return unidadeRepository.findById(id)
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    public UnidadeResponse buscarUnidade(Long id) {
+        UnidadeEntity unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
+        return unidadeMapper.toResponse(unidade);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
-    public List<UnidadeEntity> listarTodos() {
-        return unidadeRepository.findAll();
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    public List<UnidadeResponse> listarTodos() {
+
+    List<UnidadeEntity> unidades =  unidadeRepository.findAll();
+
+        return unidadeMapper.toResponseList(unidades);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public List<UnidadeEntity> listarAtivos() {
         return unidadeRepository.findByStatus(Status.STATUS_ATIVO);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public List<UnidadeEntity> listarInativos() {
         return unidadeRepository.findByStatus(Status.STATUS_INATIVO);
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
-    public Status alternarStatus(Long id) {
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    public UnidadeResponse alternarStatus(Long id) {
         UnidadeEntity unidade = unidadeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrado"));
 
@@ -100,7 +104,7 @@ public class UnidadeService {
         }
 
         unidadeRepository.save(unidade);
-        return unidade.getStatus();
+        return unidadeMapper.toResponse(unidade);
     }
 
 

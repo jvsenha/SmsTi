@@ -50,7 +50,7 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
     public ChamadoResponse cadastrar(ChamadoRequest dto) {
         UnidadeEntity unidade = unidadeRepository.findById(dto.getUnidadeId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrada!"));
@@ -67,7 +67,7 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
     public ChamadoResponse atualizar(Long id, ChamadoRequest dto) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
@@ -90,7 +90,7 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication)")
     public void deletarChamado(Long id) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para deleção!"));
@@ -98,28 +98,28 @@ public class ChamadoService {
         chamadoRepository.delete(chamado);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public ChamadoResponse buscarChamado(Long id) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
         return chamadoMapper.toResponse(chamado);
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarTodos() {
         return chamadoRepository.findAll().stream()
                 .map(chamadoMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarPendente() {
         return chamadoRepository.findByStatusChamado(StatusChamado.PENDENTE).stream()
                 .map(chamadoMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarArquivado() {
         return chamadoRepository.findByStatusChamado(StatusChamado.ARQUIVADO).stream()
                 .map(chamadoMapper::toResponse)
@@ -127,7 +127,7 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncionario(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
     public ChamadoResponse arquivarChamado(Long id) { // Removido usuarioEmail do parâmetro
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para arquivamento!"));
@@ -147,7 +147,7 @@ public class ChamadoService {
 
     // Novo método para alterar qualquer status
     @Transactional
-    @PreAuthorize("@securityService.isAdmin(authentication) or @securityService.isFuncAdm(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
     public ChamadoResponse alterarStatus(Long id, StatusChamado novoStatus) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para alteração de status!"));
