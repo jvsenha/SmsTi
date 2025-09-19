@@ -1,0 +1,12 @@
+package com.br.SmsTi.DTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ComentarioRequest {
+    private String descricao;
+}
