@@ -107,7 +107,6 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
     public UserDTO buscarUsuario(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));

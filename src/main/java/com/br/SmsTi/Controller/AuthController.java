@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://172.17.5.51:5173")
 public class AuthController {
 
     @Autowired

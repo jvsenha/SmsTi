@@ -1,5 +1,6 @@
 package com.br.SmsTi.Service;
 
+import com.br.SmsTi.DTO.ChamadoHistoricoResponse;
 import com.br.SmsTi.DTO.ChamadoRequest;
 import com.br.SmsTi.DTO.ChamadoResponse;
 import com.br.SmsTi.Entity.ChamadoEntity;
@@ -126,30 +127,9 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
-    public ChamadoResponse arquivarChamado(Long id) {
+    public ChamadoResponse atualizarStatus(Long id, StatusChamado novoStatus, String acao, String mensagem) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para arquivamento!"));
-
-        if (chamado.getStatusChamado().equals(StatusChamado.ARQUIVADO)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Chamado já está arquivado!");
-        }
-
-        String statusAnterior = chamado.getStatusChamado().name();
-        chamado.setStatusChamado(StatusChamado.ARQUIVADO);
-        chamado.setDataConclusao(LocalDateTime.now()); // Registra a data de conclusão
-        ChamadoEntity chamadoArquivado = chamadoRepository.save(chamado);
-
-        registrarHistorico(chamadoArquivado, "Arquivamento", "Chamado arquivado. Status anterior: " + statusAnterior);
-
-        return chamadoMapper.toResponse(chamadoArquivado);
-    }
-
-    @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
-    public ChamadoResponse alterarStatus(Long id, StatusChamado novoStatus) {
-        ChamadoEntity chamado = chamadoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para alteração de status!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
 
         String statusAnterior = chamado.getStatusChamado().name();
         if (chamado.getStatusChamado().equals(novoStatus)) {
@@ -160,18 +140,23 @@ public class ChamadoService {
         if (novoStatus.equals(StatusChamado.ARQUIVADO)) {
             chamado.setDataConclusao(LocalDateTime.now());
         } else {
-            chamado.setDataConclusao(null); // Limpa a data se o status for alterado
+            chamado.setDataConclusao(null);
         }
+
         ChamadoEntity atualizadoChamado = chamadoRepository.save(chamado);
 
-        registrarHistorico(atualizadoChamado, "Alteração de Status", "Status alterado de " + statusAnterior + " para " + novoStatus.name());
+        registrarHistorico(atualizadoChamado, acao, mensagem + " Status anterior: " + statusAnterior + ", novo: " + novoStatus.name());
 
         return chamadoMapper.toResponse(atualizadoChamado);
     }
 
-    public List<ChamadoHistoricoEntity> buscarHistoricoDoChamado(Long chamadoId) {
+    public List<ChamadoHistoricoResponse> buscarHistoricoDoChamado(Long chamadoId) {
         ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
-        return chamadoHistoricoRepository.findByChamadoOrderByDataAcaoAsc(chamado);
+
+        List<ChamadoHistoricoEntity> historicos = chamadoHistoricoRepository
+                .findByChamadoOrderByDataAcaoAsc(chamado); // tipo correto: ChamadoHistoricoEntity
+
+        return chamadoMapper.toResponseHistoricoList(historicos); // converte para ChamadoHistoricoResponse
     }
 }

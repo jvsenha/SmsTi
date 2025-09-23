@@ -6,6 +6,7 @@ import com.br.SmsTi.Enum.Status;
 import com.br.SmsTi.Repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
 
+        // 1️⃣ Busca no header Authorization
+        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+        }
+
+        // 2️⃣ Se não achou no header, tenta buscar no cookie JWT_TOKEN
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("JWT_TOKEN".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token != null) {
             try {
                 email = jwtUtil.extractEmail(token);
             } catch (Exception e) {
@@ -60,11 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token, email)) {
 
                 // Busca usuário no banco para pegar a role real
-                UserEntity user = userRepository.findByEmail(email)
-                        .orElse(null);
+                UserEntity user = userRepository.findByEmail(email).orElse(null);
 
                 if (user != null && user.getStatus() == Status.STATUS_ATIVO) {
-
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     user.getEmail(),

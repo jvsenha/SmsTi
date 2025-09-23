@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,7 +20,6 @@ public class UnidadeController {
     private UnidadeService unidadeService;
 
     @PostMapping("/cadastrar")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<UnidadeResponse> criarUnidade(@Valid @RequestBody UnidadeRequest request) {
         try {
             UnidadeResponse response = unidadeService.cadastrar(request);
@@ -34,7 +32,6 @@ public class UnidadeController {
     }
 
     @GetMapping("/listar")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<List<UnidadeResponse>> listarTodasUnidades() {
         try {
             List<UnidadeResponse> response = unidadeService.listarTodos();
@@ -45,7 +42,6 @@ public class UnidadeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<UnidadeResponse> buscarUnidadePorId(@PathVariable Long id) {
         try {
             UnidadeResponse response = unidadeService.buscarUnidade(id);
@@ -58,7 +54,6 @@ public class UnidadeController {
     }
 
     @PutMapping("/alterar/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<UnidadeResponse> atualizarUnidade(@PathVariable Long id, @Valid @RequestBody UnidadeRequest request) {
         try {
             UnidadeResponse response = unidadeService.atualizar(id, request);
@@ -71,7 +66,6 @@ public class UnidadeController {
     }
 
     @DeleteMapping("/deletar/{id}")
-    @PreAuthorize("hasRole('Nivel3')")
     public ResponseEntity<Void> deletarUnidade(@PathVariable Long id) {
         try {
             unidadeService.deletarUnidade(id);
@@ -84,7 +78,6 @@ public class UnidadeController {
     }
 
     @PatchMapping("/alterar/status/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<UnidadeResponse> alterarStatusUnidade(@PathVariable Long id) {
         try {
             UnidadeResponse response = unidadeService.alternarStatus(id);

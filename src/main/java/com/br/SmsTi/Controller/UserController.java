@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,7 +19,6 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/cadastrar")
-    @PreAuthorize("hasAnyRole('Nivel3')")
     public ResponseEntity<UserDTO> cadastrarUsuario(@Valid @RequestBody UserDTO dto) {
         try {
             UserDTO response = userService.cadastrar(dto);
@@ -33,7 +31,6 @@ public class UserController {
     }
 
     @GetMapping("/listar")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<List<UserDTO>> listarTodosUsuarios() {
         try {
             List<UserDTO> response = userService.listarTodos();
@@ -44,7 +41,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
     public ResponseEntity<UserDTO> buscarUsuarioPorId(@PathVariable Long id) {
         try {
             UserDTO response = userService.buscarUsuario(id);
@@ -57,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/alterar/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3')")
+
     public ResponseEntity<UserDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UserDTO dto) {
         try {
             UserDTO response = userService.atualizar(id, dto);
@@ -70,7 +66,6 @@ public class UserController {
     }
 
     @DeleteMapping("/deletar/{id}")
-    @PreAuthorize("hasAnyRole('Nivel3')")
     public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
         try {
             userService.deletarUsuario(id);

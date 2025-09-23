@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,6 @@ public class ComentarioController {
     private ComentarioService comentarioService;
 
     @PostMapping("/cadastrar")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2')")
     public ResponseEntity<ComentarioResponse> criarComentario(
             @PathVariable Long chamadoId,
             @Valid @RequestBody ComentarioRequest request) {
@@ -41,7 +39,6 @@ public class ComentarioController {
     }
 
     @GetMapping("/listar")
-    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
     public ResponseEntity<List<ComentarioResponse>> getComentariosPorChamado(@PathVariable Long chamadoId) {
         try {
             List<ComentarioResponse> response = comentarioService.getComentariosPorChamado(chamadoId);

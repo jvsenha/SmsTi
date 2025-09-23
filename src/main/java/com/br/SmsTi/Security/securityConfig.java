@@ -24,7 +24,7 @@ public class securityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Permite pedidos da sua aplicação frontend
-        configuration.setAllowedOrigins(List.of("http://172.17.5.51:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         // Cabeçalhos permitidos
