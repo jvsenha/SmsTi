@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors; // Importar Collectors
+import java.util.stream.Collectors;
 
 @Service
 public class ChamadoService {
@@ -50,24 +50,25 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public ChamadoResponse cadastrar(ChamadoRequest dto) {
         UnidadeEntity unidade = unidadeRepository.findById(dto.getUnidadeId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrada!"));
 
-        ChamadoEntity chamado = chamadoMapper.toEntity(dto); // Usa o mapper
+        ChamadoEntity chamado = chamadoMapper.toEntity(dto);
         chamado.setUnidade(unidade);
         chamado.setStatusChamado(StatusChamado.PENDENTE);
+        chamado.setDataCriacao(LocalDateTime.now()); // Definindo a data de criação
 
         ChamadoEntity salvoChamado = chamadoRepository.save(chamado);
 
-        registrarHistorico(salvoChamado, "Cadastro", "Chamado cadastrado."); // Registra o cadastro
+        registrarHistorico(salvoChamado, "Cadastro", "Chamado cadastrado.");
 
         return chamadoMapper.toResponse(salvoChamado);
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public ChamadoResponse atualizar(Long id, ChamadoRequest dto) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
@@ -75,12 +76,10 @@ public class ChamadoService {
         UnidadeEntity unidade = unidadeRepository.findById(dto.getUnidadeId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidade não encontrada!"));
 
-        // Guarda o estado anterior para detalhes do histórico, se necessário
         String statusAnterior = chamado.getStatusChamado().name();
 
-        chamadoMapper.updateEntityFromRequest(dto, chamado); // Usa o mapper para atualizar
-        chamado.setUnidade(unidade); // Atualiza a unidade, se o ID for diferente
-        // Não setar comentarios para null aqui
+        chamadoMapper.updateEntityFromRequest(dto, chamado);
+        chamado.setUnidade(unidade);
 
         ChamadoEntity atualizadoChamado = chamadoRepository.save(chamado);
 
@@ -98,28 +97,28 @@ public class ChamadoService {
         chamadoRepository.delete(chamado);
     }
 
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
     public ChamadoResponse buscarChamado(Long id) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));
         return chamadoMapper.toResponse(chamado);
     }
 
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarTodos() {
         return chamadoRepository.findAll().stream()
                 .map(chamadoMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarPendente() {
         return chamadoRepository.findByStatusChamado(StatusChamado.PENDENTE).stream()
                 .map(chamadoMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
     public List<ChamadoResponse> listarArquivado() {
         return chamadoRepository.findByStatusChamado(StatusChamado.ARQUIVADO).stream()
                 .map(chamadoMapper::toResponse)
@@ -127,8 +126,8 @@ public class ChamadoService {
     }
 
     @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel1(authentication)")
-    public ChamadoResponse arquivarChamado(Long id) { // Removido usuarioEmail do parâmetro
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication) or @securityService.isNivel1(authentication)")
+    public ChamadoResponse arquivarChamado(Long id) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para arquivamento!"));
 
@@ -138,6 +137,7 @@ public class ChamadoService {
 
         String statusAnterior = chamado.getStatusChamado().name();
         chamado.setStatusChamado(StatusChamado.ARQUIVADO);
+        chamado.setDataConclusao(LocalDateTime.now()); // Registra a data de conclusão
         ChamadoEntity chamadoArquivado = chamadoRepository.save(chamado);
 
         registrarHistorico(chamadoArquivado, "Arquivamento", "Chamado arquivado. Status anterior: " + statusAnterior);
@@ -145,9 +145,8 @@ public class ChamadoService {
         return chamadoMapper.toResponse(chamadoArquivado);
     }
 
-    // Novo método para alterar qualquer status
     @Transactional
-    @PreAuthorize("@securityService.isNivel3(authentication) or@securityService.isNivel2(authentication)")
+    @PreAuthorize("@securityService.isNivel3(authentication) or @securityService.isNivel2(authentication)")
     public ChamadoResponse alterarStatus(Long id, StatusChamado novoStatus) {
         ChamadoEntity chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado para alteração de status!"));
@@ -158,6 +157,11 @@ public class ChamadoService {
         }
 
         chamado.setStatusChamado(novoStatus);
+        if (novoStatus.equals(StatusChamado.ARQUIVADO)) {
+            chamado.setDataConclusao(LocalDateTime.now());
+        } else {
+            chamado.setDataConclusao(null); // Limpa a data se o status for alterado
+        }
         ChamadoEntity atualizadoChamado = chamadoRepository.save(chamado);
 
         registrarHistorico(atualizadoChamado, "Alteração de Status", "Status alterado de " + statusAnterior + " para " + novoStatus.name());
@@ -165,7 +169,6 @@ public class ChamadoService {
         return chamadoMapper.toResponse(atualizadoChamado);
     }
 
-    // Método para buscar histórico de um chamado
     public List<ChamadoHistoricoEntity> buscarHistoricoDoChamado(Long chamadoId) {
         ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado!"));

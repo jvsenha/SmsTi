@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 @Component
 public class ChamadoMapper {
 
-
     public ChamadoEntity toEntity(ChamadoRequest request) {
         if (request == null) {
             return null;
@@ -22,7 +21,6 @@ public class ChamadoMapper {
         entity.setMemorando(request.getMemorando());
         entity.setCategoria(request.getCategoria());
         entity.setPrioridade(request.getPrioridade());
-        // A Unidade e o Status serão setados no Service
         return entity;
     }
 
@@ -37,14 +35,14 @@ public class ChamadoMapper {
         response.setMemorando(entity.getMemorando());
         response.setCategoria(entity.getCategoria());
         response.setPrioridade(entity.getPrioridade());
+        response.setDataCriacao(entity.getDataCriacao()); // Novo campo
+        response.setDataConclusao(entity.getDataConclusao()); // Novo campo
 
-        // Mapeamento condicional da Unidade
         if (entity.getUnidade() != null) {
             response.setUnidadeId(entity.getUnidade().getId());
             response.setUnidadeName(entity.getUnidade().getNome());
         }
 
-        // Mapeamento do Status
         response.setStatusChamado(entity.getStatusChamado());
 
         return response;
@@ -69,5 +67,4 @@ public class ChamadoMapper {
         entity.setCategoria(request.getCategoria());
         entity.setPrioridade(request.getPrioridade());
     }
-
 }

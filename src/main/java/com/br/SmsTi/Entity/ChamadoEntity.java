@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -18,6 +19,7 @@ import java.util.List;
 public class ChamadoEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "titulo", nullable = false)
@@ -29,23 +31,27 @@ public class ChamadoEntity {
     @Column(name = "memorando", nullable = false)
     private Integer memorando;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING) // Armazenará a String (ex: "HARDWARE") no banco de dados
+    @Column(name = "categoria", nullable = false) // Nome da coluna no banco
     private Categorias categoria;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name ="prioridade", nullable = false)
     private Prioridade prioridade;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name ="statusChamado", nullable = false)
     private StatusChamado statusChamado;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Adicionado fetch = FetchType.LAZY
     @JoinColumn(name = "unidade_Id", nullable = false)
     private UnidadeEntity unidade;
 
-    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Adicionado fetch = FetchType.LAZY
     private List<ComentarioEntity> comentarios;
 
+    @Column( name = "dataCriacao", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao = LocalDateTime.now();
+    @Column( name = "dataConclusao")
+    private LocalDateTime dataConclusao;
 }

@@ -11,12 +11,16 @@ import com.br.SmsTi.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+@Service
 public class ComentarioService {
 
     @Autowired
@@ -29,6 +33,7 @@ public class ComentarioService {
     private UserRepository userRepository;
 
     @Transactional
+    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
     public ComentarioResponse criarComentario(Long chamadoId, String usuarioEmail, ComentarioRequest request) {
         ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));
@@ -38,7 +43,7 @@ public class ComentarioService {
 
         ComentarioEntity novoComentario = new ComentarioEntity();
         novoComentario.setDescricao(request.getDescricao());
-        novoComentario.setDataComentario(LocalDate.now());
+        novoComentario.setDataComentario(LocalDateTime.now()); // Usando LocalDateTime
         novoComentario.setChamado(chamado);
         novoComentario.setUsuario(usuario);
 
@@ -47,6 +52,7 @@ public class ComentarioService {
         return new ComentarioResponse(salvo.getId(), salvo.getDescricao(), salvo.getUsuario().getNome(), salvo.getDataComentario());
     }
 
+    @PreAuthorize("hasAnyRole('Nivel3', 'Nivel2', 'Nivel1')")
     public List<ComentarioResponse> getComentariosPorChamado(Long chamadoId) {
         ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));

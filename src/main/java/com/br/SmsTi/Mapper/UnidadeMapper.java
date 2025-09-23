@@ -2,10 +2,12 @@ package com.br.SmsTi.Mapper;
 
 import com.br.SmsTi.DTO.UnidadeResponse;
 import com.br.SmsTi.Entity.UnidadeEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class UnidadeMapper {
 
 

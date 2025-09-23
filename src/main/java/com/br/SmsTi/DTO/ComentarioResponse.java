@@ -1,8 +1,10 @@
 package com.br.SmsTi.DTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -11,5 +13,5 @@ public class ComentarioResponse {
     private Long id;
     private String descricao;
     private String nomeUsuario;
-    private LocalDate dataComentario;
+    private LocalDateTime dataComentario;
 }

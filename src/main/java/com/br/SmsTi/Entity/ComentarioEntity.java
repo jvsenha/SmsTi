@@ -1,19 +1,18 @@
 package com.br.SmsTi.Entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "comentarios")
-public class ComentarioEntity{
+public class ComentarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,9 @@ public class ComentarioEntity{
     @JoinColumn(name = "usuario_id", nullable = false)
     private UserEntity usuario;
 
+    @Column(nullable = false, length = 1000)
     private String descricao;
 
-    private LocalDate dataComentario;
+    @Column(nullable = false)
+    private LocalDateTime dataComentario = LocalDateTime.now();
 }

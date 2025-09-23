@@ -14,19 +14,19 @@ public class ChamadoHistoricoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "unidadeId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chamado_id", nullable = false)
     private ChamadoEntity chamado;
 
     @Column(nullable = false)
-    private String tipoAcao; // Ex: "Arquivado", "Atualizado", "Transferido"
+    private String tipoAcao; // Ex: "Arquivado", "Atualizado"
 
     @Column(nullable = false)
-    private String usuarioAcao; // Nome ou e-mail do usuário que realizou a ação
+    private String usuarioAcao; // Nome ou e-mail do usuário
 
     @Column(nullable = false)
     private LocalDateTime dataAcao;
 
-    @Column
-    private String detalhes; // Opcional: para registrar detalhes da alteração
+    @Column(length = 2000) // Exemplo de um limite de tamanho
+    private String detalhes;
 }
