@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,28 +24,19 @@ public class ComentarioController {
     public ResponseEntity<ComentarioResponse> criarComentario(
             @PathVariable Long chamadoId,
             @Valid @RequestBody ComentarioRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String usuarioEmail = authentication.getName();
 
-            ComentarioResponse response = comentarioService.criarComentario(chamadoId, usuarioEmail, request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao criar comentário", e);
-        }
+        // Sem try-catch: a lógica de negócio fica mais clara
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuarioEmail = authentication.getName();
+
+        ComentarioResponse response = comentarioService.criarComentario(chamadoId, usuarioEmail, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/listar")
     public ResponseEntity<List<ComentarioResponse>> getComentariosPorChamado(@PathVariable Long chamadoId) {
-        try {
-            List<ComentarioResponse> response = comentarioService.getComentariosPorChamado(chamadoId);
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao listar comentários", e);
-        }
+        // Sem try-catch aqui também
+        List<ComentarioResponse> response = comentarioService.getComentariosPorChamado(chamadoId);
+        return ResponseEntity.ok(response);
     }
 }

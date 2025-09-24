@@ -5,6 +5,7 @@ import com.br.SmsTi.DTO.ComentarioResponse;
 import com.br.SmsTi.Entity.ChamadoEntity;
 import com.br.SmsTi.Entity.ComentarioEntity;
 import com.br.SmsTi.Entity.UserEntity;
+import com.br.SmsTi.Exception.ResourceNotFoundException;
 import com.br.SmsTi.Repository.ChamadoRepository;
 import com.br.SmsTi.Repository.ComentarioRepository;
 import com.br.SmsTi.Repository.UserRepository;
@@ -34,10 +35,10 @@ public class ComentarioService {
     @Transactional
     public ComentarioResponse criarComentario(Long chamadoId, String usuarioEmail, ComentarioRequest request) {
         ChamadoEntity chamado = chamadoRepository.findById(chamadoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado com ID " + chamadoId + " não encontrado."));
 
         UserEntity usuario = userRepository.findByEmail(usuarioEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário com email " + usuarioEmail + " não encontrado."));
 
         ComentarioEntity novoComentario = new ComentarioEntity();
         novoComentario.setDescricao(request.getDescricao());
